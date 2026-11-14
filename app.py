@@ -16,13 +16,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Page Configuration
 st.set_page_config(
-    page_title="TED & Books Cross-Domain Recommender",
+    page_title="TED Talks ML Recommender",
     page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Polished Custom Theme & Card Styling
+# Polished Theme & Card Styling
 st.markdown("""
 <style>
     /* Main Banner */
@@ -36,7 +36,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
-    /* Talk & Book Cards */
+    /* Talk Cards */
     .content-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -50,7 +50,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     
-    /* Pill Badges */
+    /* Badges */
     .badge-gray {
         background-color: #f1f5f9;
         color: #475569;
@@ -69,19 +69,6 @@ st.markdown("""
         font-weight: 700;
         font-size: 12px;
     }
-    .badge-book-genre {
-        background-color: #e0f2fe;
-        color: #0369a1;
-        padding: 3px 9px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .badge-stars {
-        color: #0284c7;
-        font-weight: 700;
-        font-size: 12px;
-    }
     
     /* Footer */
     .footer-box {
@@ -97,10 +84,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------- CACHED MODEL & MULTI-DOMAIN DATA PIPELINE -----------------
+# ----------------- CACHED MODEL & DATA PIPELINE -----------------
 @st.cache_resource(show_spinner="Training ML models & building semantic indices...")
 def load_and_train():
-    # 1. DOMAIN 1: TED Talks
     df = pd.read_csv('ted_talks.csv')
     shortlisted_cols = [
         'socialTitle', 'description', 'duration', 'publishedAt', 
@@ -201,20 +187,9 @@ def load_and_train():
     tfidf_talks = TfidfVectorizer(max_features=5000, stop_words='english', ngram_range=(1, 2))
     tfidf_mat_talks = tfidf_talks.fit_transform(df_clean['combined_content'])
 
-    # 2. DOMAIN 2: Goodreads Books (Kaggle Benchmark)
-    df_books = pd.read_csv('books.csv')
-    df_books['combined_content'] = (
-        df_books['title'].fillna('') + ' ' +
-        df_books['author'].fillna('') + ' ' +
-        df_books['genre'].fillna('') + ' ' +
-        df_books['description'].fillna('')
-    )
-    tfidf_books = TfidfVectorizer(max_features=2500, stop_words='english', ngram_range=(1, 2))
-    tfidf_mat_books = tfidf_books.fit_transform(df_books['combined_content'])
+    return df_clean, tfidf_talks, tfidf_mat_talks, median_views
 
-    return df_clean, tfidf_talks, tfidf_mat_talks, median_views, df_books, tfidf_books, tfidf_mat_books
-
-df_clean, tfidf, tfidf_matrix, median_views, df_books, tfidf_books, tfidf_mat_books = load_and_train()
+df_clean, tfidf, tfidf_matrix, median_views = load_and_train()
 
 # ----------------- SESSION STATE -----------------
 if 'watched_talks' not in st.session_state:
@@ -226,10 +201,10 @@ if 'query' not in st.session_state:
 st.markdown("""
 <div class="hero-banner">
     <div style="font-size:24px; font-weight:800; letter-spacing:-0.5px;">
-        <span style="color:#ef4444;">TED</span> &amp; <span style="color:#38bdf8;">Goodreads</span> Cross-Domain Recommender
+        <span style="color:#ef4444;">TED Talks</span> Smart Recommendation Engine
     </div>
     <div style="font-size:13px; color:#94a3b8; margin-top:5px; font-weight:400;">
-        Multi-Domain Architecture: TF-IDF Semantic Retrieval + Supervised Ensemble Re-Ranking (Random Forest, Decision Tree, Logistic Regression) + Bayesian Rating Normalization
+        Two-Stage Hybrid Architecture: Stage-1 TF-IDF Semantic Candidate Retrieval &bull; Stage-2 Supervised Popularity Re-Ranking (Random Forest, Decision Tree, Logistic Regression)
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -237,9 +212,9 @@ st.markdown("""
 # Status Metric Cards
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("Indexed TED Talks", f"{len(df_clean):,}")
-m2.metric("Companion Books", f"{len(df_books):,}")
+m2.metric("Supervised Models", "3 (RF, DT, LR)")
 m3.metric("Watched History", f"{len(st.session_state.watched_talks)} talks")
-m4.metric("Talk Popularity Benchmark", f"{int(median_views):,} views")
+m4.metric("Popularity Split (Median)", f"{int(median_views):,} views")
 
 # ----------------- QUICK PRESET BUTTONS -----------------
 st.markdown("<p style='font-size:13px; font-weight:600; color:#475569; margin:14px 0 6px 0;'>⚡ Quick Explore Topics:</p>", unsafe_allow_html=True)
@@ -266,7 +241,7 @@ with c_search:
         st.session_state.query = user_query
 
 with c_slider:
-    top_n = st.slider("Top Results:", min_value=2, max_value=8, value=4)
+    top_n = st.slider("Top Recommendations:", min_value=2, max_value=8, value=4)
 
 with c_filter:
     st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
@@ -278,8 +253,7 @@ with c_reset:
         st.session_state.watched_talks.clear()
         st.rerun()
 
-# ----------------- RECOMMENDATION ENGINES -----------------
-# 1. Talk Recommender (Domain 1)
+# ----------------- RECOMMENDATION ENGINE -----------------
 def get_talk_recommendations(query, model_code='rf', top_n=4, filter_viewed=True):
     if not query.strip():
         return pd.DataFrame()
@@ -306,20 +280,6 @@ def get_talk_recommendations(query, model_code='rf', top_n=4, filter_viewed=True
     ranked = cand_df.sort_values(by=[prob_col, 'similarity'], ascending=[False, False]).head(top_n)
     return ranked
 
-# 2. Book Recommender (Domain 2 - Goodreads Benchmark)
-def get_book_recommendations(query, top_n=4):
-    if not query.strip():
-        return pd.DataFrame()
-    query_vec = tfidf_books.transform([query])
-    sim_scores = cosine_similarity(query_vec, tfidf_mat_books).flatten()
-
-    books_copy = df_books.copy()
-    books_copy['similarity'] = sim_scores
-    # Quality-Weighted Hybrid Scoring: 70% Topic Relevance + 30% Rating Normalized
-    books_copy['composite_score'] = (books_copy['similarity'] * 0.70) + ((books_copy['average_rating'] / 5.0) * 0.30)
-    ranked_books = books_copy.sort_values(by=['composite_score', 'similarity'], ascending=[False, False]).head(top_n)
-    return ranked_books
-
 def render_talk_cards(rec_df, model_code):
     if rec_df.empty:
         st.info("No unwatched talks found for this topic. Try resetting watched history or changing the search keyword.")
@@ -344,7 +304,7 @@ def render_talk_cards(rec_df, model_code):
             <div style="font-size:16px; font-weight:700; color:#0f172a; margin:4px 0 2px 0;">{row['socialTitle']}</div>
             <div style="color:#ef4444; font-size:13px; font-weight:600; margin-bottom:8px;">Speaker: {row['speaker_name']}</div>
             <div style="font-size:12px; color:#64748b; line-height:1.4;">
-                Cosine Similarity: <b>{row['similarity']:.3f}</b> &nbsp;|&nbsp; Key Topics: {row['topic_tags'][:65]}...
+                Cosine Similarity: <b>{row['similarity']:.3f}</b> &nbsp;|&nbsp; Key Topics: {row['topic_tags'][:75]}...
             </div>
         </div>
         """
@@ -355,70 +315,41 @@ def render_talk_cards(rec_df, model_code):
                 st.session_state.watched_talks.add(idx)
                 st.rerun()
 
-def render_book_cards(books_df):
-    if books_df.empty:
-        st.info("No companion books found for this topic.")
-        return
-    for _, b in books_df.iterrows():
-        stars = "★" * int(round(b['average_rating']))
-        book_html = f"""
-        <div class="content-card" style="border-left: 5px solid #0284c7;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="badge-book-genre">
-                    📚 {b['genre']}
-                </span>
-                <span class="badge-stars">
-                    {stars} {b['average_rating']} / 5.0 <span style="color:#64748b; font-weight:normal;">({b['ratings_count']:,} ratings)</span>
-                </span>
-            </div>
-            <div style="font-size:16px; font-weight:700; color:#0f172a; margin:4px 0 2px 0;">📖 {b['title']}</div>
-            <div style="color:#0284c7; font-size:13px; font-weight:600; margin-bottom:8px;">Author: {b['author']}</div>
-            <div style="font-size:13px; color:#334155; line-height:1.45; margin-bottom:8px;">
-                {b['description']}
-            </div>
-            <div style="font-size:11px; color:#64748b;">
-                Semantic Match: <b>{b['similarity']:.3f}</b> &nbsp;|&nbsp; Quality-Weighted Score: <b>{b['composite_score']:.3f}</b>
-            </div>
-        </div>
-        """
-        st.markdown(book_html, unsafe_allow_html=True)
-
-# ----------------- MULTI-DOMAIN TABS -----------------
+# ----------------- MODEL EVALUATION & TABS -----------------
 st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
-tab_rf, tab_lr, tab_dt, tab_comp, tab_books = st.tabs([
-    "🌲 Random Forest (Talks)", 
-    "📈 Logistic Regression (Talks)", 
-    "🌳 Decision Tree (Talks)", 
-    "⚖️ Model Comparison Matrix",
-    "📚 Companion Books (Goodreads 10k)"
+tab_rf, tab_lr, tab_dt, tab_comp = st.tabs([
+    "🌲 Random Forest (Ensemble Re-Ranker)", 
+    "📈 Logistic Regression (Linear Baseline)", 
+    "🌳 Decision Tree (Interpretable Rules)", 
+    "⚖️ Model Comparison & Consensus Matrix"
 ])
 
 with tab_rf:
     st.subheader("Random Forest Popularity Re-Ranking (Best Performing: AUC 0.74)")
-    st.caption("Ensemble Bagging Architecture: Aggregating 150 Decision Trees to predict viral popularity while eliminating variance.")
+    st.caption("Ensemble Bagging Architecture: Aggregating 150 Decision Trees to predict high-engagement talks while minimizing variance.")
     df_rf = get_talk_recommendations(st.session_state.query, model_code='rf', top_n=top_n, filter_viewed=filter_watched)
     render_talk_cards(df_rf, 'rf')
 
 with tab_lr:
     st.subheader("Logistic Regression Re-Ranking (Linear Baseline: AUC 0.60)")
-    st.caption("Linear Probabilistic Baseline: Regularized with L2 (Ridge) penalty to establish a benchmark for linear separation.")
+    st.caption("Linear Probabilistic Model: Regularized with L2 (Ridge) penalty to provide a fast, calibrated linear benchmark.")
     df_lr = get_talk_recommendations(st.session_state.query, model_code='lr', top_n=top_n, filter_viewed=filter_watched)
     render_talk_cards(df_lr, 'lr')
 
 with tab_dt:
     st.subheader("Decision Tree Re-Ranking (Pruned Tree: AUC 0.72)")
-    st.caption("Non-Linear Hierarchical Decision Rules: Regularized via max_depth and min_samples_leaf to prevent overfitting.")
+    st.caption("Hierarchical Rule-Based Decision Architecture: Pruned via max_depth=10 and min_samples_leaf=50 to prevent overfitting.")
     df_dt = get_talk_recommendations(st.session_state.query, model_code='dt', top_n=top_n, filter_viewed=filter_watched)
     render_talk_cards(df_dt, 'dt')
 
 with tab_comp:
-    st.subheader("Side-by-Side Model Evaluation Matrix")
-    st.caption("Compares how all three supervised models evaluate candidate talks across agreement and popularity probability.")
+    st.subheader("Side-by-Side Model Consensus Matrix")
+    st.caption("Compares how all three supervised models evaluate candidate talks across agreement, classification, and predicted popularity probabilities.")
     if not df_rf.empty:
         comp_data = []
         for rank, (_, row) in enumerate(df_rf.iterrows(), 1):
             preds = [row['lr_pred'], row['dt_pred'], row['rf_pred']]
-            consensus = "Full Agreement" if (preds[0] == preds[1] == preds[2]) else "Majority"
+            consensus = "Full Agreement" if (preds[0] == preds[1] == preds[2]) else "Majority (2 vs 1)"
             comp_data.append({
                 "Rank": rank,
                 "Title": row['socialTitle'][:45] + "...",
@@ -433,20 +364,13 @@ with tab_comp:
     else:
         st.info("No candidates available for comparison.")
 
-with tab_books:
-    st.subheader(f"📚 Companion Reading for: '{st.session_state.query}'")
-    st.caption("Cross-Domain Knowledge Hub: Recommending authoritative books from the Goodreads 10k Benchmark aligned with this topic.")
-    rec_books = get_book_recommendations(st.session_state.query, top_n=top_n)
-    render_book_cards(rec_books)
-
-# ----------------- FOOTER & ACADEMIC DATA CITATIONS -----------------
+# ----------------- FOOTER & CITATIONS -----------------
 st.markdown("""
 <div class="footer-box">
-    <b>Verified Academic Data Sources:</b><br>
-    Domain 1: <i>TED Talks Official Dataset (Kaggle)</i> &bull; 5,429 talks &bull; 
-    Domain 2: <i>Goodreads 10k Benchmark (Kaggle / UCSD Book Graph)</i><br>
+    <b>Course Project: CSE2032 Machine Learning</b> &bull; BML Munjal University<br>
+    <b>Dataset:</b> <i>Official TED Talks Dataset (Kaggle)</i> &bull; 5,429 talks &bull; 27 raw attributes<br>
     <span style="font-size:11px; color:#94a3b8;">
-        Architecture: TF-IDF Text Extraction + 5-Fold Stratified Cross-Validation + Supervised Ensemble Popularity Re-Ranking + Bayesian Rating Normalization
+        Architecture: Stage 1 TF-IDF Text Extraction + Stage 2 Supervised ML Classification (Random Forest, Decision Tree, Logistic Regression) &bull; 5-Fold Stratified Cross-Validation
     </span>
 </div>
 """, unsafe_allow_html=True)

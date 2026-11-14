@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Viva Guide - TED Talks Smart ML Recommender</title>
+    <style>
+        :root {
+            --primary: #b91c1c;
+            --primary-dark: #0f172a;
+            --primary-light: #ef4444;
+            --secondary: #0f766e;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --code-bg: #0f172a;
+            --callout-info: #eff6ff;
+            --callout-warn: #fffbeb;
+            --callout-success: #f0fdf4;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            font-size: 15px;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 36px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        header {
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+        }
+        h1 {
+            color: var(--primary-dark);
+            font-size: 26px;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .badge {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .badge-blue {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        h2 {
+            color: var(--primary-dark);
+            font-size: 20px;
+            margin: 28px 0 14px 0;
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+        }
+        h3 {
+            color: #1e293b;
+            font-size: 16px;
+            margin: 18px 0 8px 0;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+            margin: 16px 0;
+        }
+        .role-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+        }
+        .role-box h4 {
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .role-box p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .qa-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        .qa-q {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 14.5px;
+            margin-bottom: 6px;
+        }
+        .qa-a {
+            color: #334155;
+            font-size: 13.5px;
+            line-height: 1.5;
+        }
+        .qa-hinglish {
+            background: #f1f5f9;
+            border-left: 3px solid #64748b;
+            padding: 8px 12px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: #1e293b;
+            border-radius: 0 4px 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 13.5px;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        code {
+            background: #f1f5f9;
+            color: #b91c1c;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .formula {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 600;
+            color: #0f172a;
+            margin: 6px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎙️ Master Viva & Defense Guide (100% TED Talks ML)</h1>
+        <div class="subtitle">B.Tech 5th Semester &bull; Machine Learning (CSE2032) &bull; BML Munjal University</div>
+        <div class="badge-row">
+            <span class="badge">Dataset: 5,429 TED Talks</span>
+            <span class="badge-blue">Stage 1: TF-IDF + Cosine Retrieval</span>
+            <span class="badge">Stage 2: Supervised Re-Ranking</span>
+            <span class="badge-blue">Models: RF, DT, Logistic Regression</span>
+            <span class="badge">Zero Target Leakage</span>
+        </div>
+    </header>
+
+    <!-- SECTION 1: 1-MINUTE ELEVATOR PITCH -->
+    <h2>1. The 1-Minute Project Summary (Jab Mam Bole: "Explain your project")</h2>
+    <div class="card" style="background:#eff6ff; border-color:#93c5fd;">
+        <p><b>English Pitch:</b><br>
+        "Our project is a <b>Two-Stage Hybrid TED Talk Recommendation Engine</b>. Because public video platforms lack individual user clickstream logs, traditional collaborative filtering fails. We solved this using a 2-stage architecture:
+        <b>Stage 1</b> uses Natural Language Processing (TF-IDF vectorizer + Cosine Similarity) to semantically filter candidate talks matching the user's topic query.
+        <b>Stage 2</b> applies trained supervised machine learning models—comparing <b>Logistic Regression</b>, a pruned <b>Decision Tree</b>, and an ensemble <b>Random Forest</b>—to predict audience popularity (views above median of 1.36M) and re-rank the candidates. We strictly avoid target leakage by never feeding view count or cosine score into the classifier. Random Forest achieved the best AUC of 0.749, and the complete engine is deployed on Streamlit."</p>
+        
+        <div class="qa-hinglish" style="margin-top:10px;">
+            <b>Hinglish me samjho:</b><br>
+            "Mam, hamare dataset me user ka watch history ya rating nahi thi, to direct collaborative filtering nahi ho sakti thi. Isliye humne 2-stage system banaya: Pehle stage me TF-IDF se user ke topic se match hone wale talks nikaale. Fir doosre stage me Random Forest, Decision Tree aur Logistic Regression se predict kiya ki kaunsi talk actually high-popularity wali hai aur unhe re-rank kiya. Humne view count ko model ke input me bilkul nahi diya taaki target leakage na ho."
+        </div>
+    </div>
+
+    <!-- SECTION 2: 4-MEMBER RESPONSIBILITY MATRIX -->
+    <h2>2. 4-Member Viva Role Distribution</h2>
+    <div class="role-grid">
+        <div class="role-box">
+            <h4>Member 1: Data & EDA</h4>
+            <p><b>Topics:</b> Handling nested JSON in <code>topics</code>, <code>speakers</code>, <code>type</code>. Removing duplicates (5,429 talks). Outlier analysis on duration and views.</p>
+        </div>
+        <div class="role-box">
+            <h4>Member 2: Feature Engineering</h4>
+            <p><b>Topics:</b> Target binarization (median split at 1.36M views). StandardScaler on continuous features, OneHotEncoder on categories. <b>Target Leakage prevention</b>.</p>
+        </div>
+        <div class="role-box">
+            <h4>Member 3: Baseline & Decision Tree</h4>
+            <p><b>Topics:</b> Logistic Regression with L2 penalty (AUC 0.60). Decision Tree with Entropy criterion, pre-pruning via <code>max_depth=10</code> and <code>min_samples_leaf=50</code> (AUC 0.72).</p>
+        </div>
+        <div class="role-box">
+            <h4>Member 4: Ensemble & Deployment</h4>
+            <p><b>Topics:</b> Random Forest with 150 bagged trees, <code>sqrt</code> features (AUC 0.749). 5-Fold Stratified CV. TF-IDF pipeline and interactive Streamlit UI with consensus matrix.</p>
+        </div>
+    </div>
+
+    <!-- SECTION 3: CORE VIVA QUESTIONS & ANSWERS -->
+    <h2>3. High-Frequency Viva Questions (Direct Answers)</h2>
+
+    <div class="qa-box">
+        <div class="qa-q">Q1. Why didn't you use Collaborative Filtering (User-Item Matrix)?</div>
+        <div class="qa-a">Collaborative filtering requires explicit user-item interaction data (user IDs, ratings, or watch logs). Our dataset only contains video-level metadata (views, speaker, title, description). Hence, we used content-based semantic retrieval combined with supervised popularity re-ranking.</div>
+        <div class="qa-hinglish">Hinglish: "Kyunki dataset me alag-alag users ki watch history ya ratings nahi thi, sirf video ka data tha."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q2. What is Target Leakage, and how did you prevent it?</div>
+        <div class="qa-a">Target leakage occurs when an input feature contains direct or indirect information about the target variable that would not be available during real-time inference. Here:
+        1. Our target <code>is_popular</code> was derived from <code>viewedCount</code>. We <b>completely dropped</b> <code>viewedCount</code> from the feature matrix $X$.
+        2. The TF-IDF cosine similarity used for Stage 1 candidate retrieval is <b>never fed</b> as a feature to the classifier. The models only learn from talk duration, age, topic count, speaker, and context.</div>
+        <div class="qa-hinglish">Hinglish: "Target <code>viewedCount</code> se bana tha, isliye <code>viewedCount</code> ko features me se hata diya. Aur TF-IDF score bhi classifier ko nahi diya, taaki model cheating na kare."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q3. Why did you use Median Split instead of Mean Split for popularity?</div>
+        <div class="qa-a"><code>viewedCount</code> is severely right-skewed (a few viral talks have 70M+ views, pulling the mean up to ~2.1M views). If we used the mean, only ~28% of talks would be labeled popular (class imbalance). The median ($1,362,484$ views) splits the dataset into exact <b>50% Class 1 and 50% Class 0</b>, creating a balanced dataset without needing SMOTE.</div>
+        <div class="qa-hinglish">Hinglish: "Views right-skewed the. Mean use karte to 70% talks unpopular ho jaati. Median use karne se exactly 50-50% balanced classes ban gayi."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q4. Compare the 3 models: Why is Random Forest better than Logistic Regression and Decision Tree?</div>
+        <div class="qa-a">
+            <table>
+                <tr>
+                    <th>Model</th>
+                    <th>AUC-ROC</th>
+                    <th>Accuracy</th>
+                    <th>Characteristics / Trade-off</th>
+                </tr>
+                <tr>
+                    <td><b>Logistic Regression</b></td>
+                    <td>0.601</td>
+                    <td>58.2%</td>
+                    <td>Linear decision boundary. Cannot capture non-linear relationships (e.g., talks between 12-18 mins perform best; very short or very long talks get fewer views).</td>
+                </tr>
+                <tr>
+                    <td><b>Decision Tree</b></td>
+                    <td>0.722</td>
+                    <td>65.8%</td>
+                    <td>Non-linear and interpretable. Pruned with <code>max_depth=10</code> and <code>min_samples_leaf=50</code> to prevent overfitting on training data.</td>
+                </tr>
+                <tr>
+                    <td><b>Random Forest</b></td>
+                    <td><b>0.749</b></td>
+                    <td><b>68.4%</b></td>
+                    <td><b>Ensemble Bagging:</b> Combines 150 de-correlated decision trees with feature subsampling ($\sqrt{d}$). Drastically reduces variance while maintaining low bias.</td>
+                </tr>
+            </table>
+        </div>
+        <div class="qa-hinglish">Hinglish: "Logistic regression fail ho gaya kyunki data me linear boundary nahi thi. Decision tree non-linear tha par single tree me variance hoti hai. Random Forest ne 150 trees ka voting ensemble banaya jisse variance khatam ho gayi aur AUC 0.749 mila."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q5. What is Bagging and how does Random Forest work?</div>
+        <div class="qa-a">Bagging stands for <b>Bootstrap Aggregating</b>.
+        1. <b>Bootstrap:</b> Creates 150 subsets of data by sampling with replacement.
+        2. <b>Random Feature Subspace:</b> At each node split, it only considers $\sqrt{d}$ random features (de-correlating trees).
+        3. <b>Aggregating:</b> For probability, it averages the class probabilities of all 150 trees:
+        <div class="formula">P(y=1|x) = (1 / B) * Σ P_b(y=1|x)</div>
+        </div>
+        <div class="qa-hinglish">Hinglish: "Bootstrap ka matlab random sampling with replacement. 150 alag-alag trees train hote hain aur split karte waqt sirf random features dekhe jaate hain. Final output saare trees ka average hota hai."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q6. What is TF-IDF and Cosine Similarity in Stage 1?</div>
+        <div class="qa-a">
+        <b>TF-IDF (Term Frequency - Inverse Document Frequency):</b> Measures how important a word is to a talk relative to the entire corpus.
+        <div class="formula">TF-IDF(t, d) = TF(t, d) * log(N / DF(t))</div>
+        <b>Cosine Similarity:</b> Calculates the cosine of the angle between the query vector and talk vector:
+        <div class="formula">Cosine Sim(A, B) = (A · B) / (||A|| * ||B||)</div>
+        Range is 0 (completely unrelated) to 1 (identical topic).
+        </div>
+        <div class="qa-hinglish">Hinglish: "TF-IDF se words ko importance milti hai (common words jaise 'the', 'is' ka weight drop ho jata hai). Cosine similarity do vectors ke beech ka angle measure karti hai."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q7. What is 5-Fold Stratified Cross-Validation?</div>
+        <div class="qa-a">Dataset is divided into 5 equal folds while preserving the 50:50 class proportion in each fold. In each iteration, 4 folds (80%) are used for training and 1 fold (20%) for testing. This is repeated 5 times so every talk is tested once, preventing test-set bias.</div>
+        <div class="qa-hinglish">Hinglish: "5-Fold CV me pure dataset ko 5 parts me baanta, har baar 4 part pe train aur 1 part pe test kiya. 'Stratified' ka matlab har fold me positive aur negative class ka ratio barabar raha."</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">Q8. How does your Streamlit deployment work?</div>
+        <div class="qa-a">The app is built in Python using Streamlit:
+        1. <code>@st.cache_resource</code> loads the cleaned data, fits the TF-IDF matrix, and trains the models once during startup.
+        2. Users can enter any search query or click preset buttons.
+        3. The app displays 4 tabs: Random Forest, Logistic Regression, Decision Tree, and a <b>Side-by-Side Model Consensus Matrix</b> showing if models agree (Full Agreement vs Majority).
+        4. Users can mark talks as "Watched", which filters them out in real time via Streamlit Session State.</div>
+        <div class="qa-hinglish">Hinglish: "Streamlit cloud pe deployed hai. Startup pe model cache ho jata hai. User topic search karta hai to real-time me recommendations aate hain aur Consensus matrix me teeno models ka comparison dikhta hai."</div>
+    </div>
+
+    <!-- SECTION 4: FORMULAS CHEAT SHEET -->
+    <h2>4. Quick Formulas Cheat Sheet</h2>
+    <div class="card">
+        <ul>
+            <li><b>Sigmoid Function (Logistic Regression):</b> $\sigma(z) = \frac{1}{1 + e^{-z}}$</li>
+            <li><b>Entropy (Decision Tree):</b> $H(S) = - \sum p_i \log_2(p_i)$</li>
+            <li><b>Information Gain:</b> $IG(S, A) = H(S) - \sum \frac{|S_v|}{|S|} H(S_v)$</li>
+            <li><b>StandardScaler:</b> $z = \frac{x - \mu}{\sigma}$</li>
+            <li><b>Precision:</b> $\frac{TP}{TP + FP}$ &nbsp;|&nbsp; <b>Recall:</b> $\frac{TP}{TP + FN}$ &nbsp;|&nbsp; <b>F1:</b> $2 \cdot \frac{P \cdot R}{P + R}$</li>
+            <li><b>AUC-ROC:</b> Area under True Positive Rate vs False Positive Rate curve across all classification thresholds.</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,3 +1,8 @@
 .ipynb_checkpoints
 __pycache__/
 *.pyc
+data.csv/
+data.csv.zip
+goodbooks_raw.csv
+books_clean.csv
+books.csv
